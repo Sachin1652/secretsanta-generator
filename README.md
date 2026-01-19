@@ -65,7 +65,7 @@ A small summary of the skills showcased during this project: :small_red_triangle
 * H2 in-memory database management
 * Software/web application development processes
 * MVC architecture along with DAO, model, service layers, and similar
-* Accessibility, web design
+* Accessibility, web design  
 * Web application debugging
 * Where Santa lives
 * More! :)
