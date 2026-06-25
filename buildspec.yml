@@ -1,17 +1,29 @@
-build:
-  commands:
-    - echo "Building Maven project..."
-    - mvn clean package -DskipTests
+```yaml
+version: 0.2
 
-    - echo "Current directory:"
-    - pwd
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - REGION=$AWS_DEFAULT_REGION
+      - REPOSITORY_NAME=secret-santa
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
-    - echo "Project files:"
-    - ls -la
+  build:
+    commands:
+      - echo "Building Maven project..."
+      - mvn clean package -DskipTests
+      - ls -la
+      - ls -la target
+      - echo "Building Docker image..."
+      - docker build -t $REPOSITORY_NAME .
+      - docker tag $REPOSITORY_NAME:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
 
-    - echo "Target directory:"
-    - ls -la target || true
-
-    - echo "Building Docker image..."
-    - docker build -t $REPOSITORY_NAME .
-    - docker tag $REPOSITORY_NAME:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "Pushing image..."
+      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
+      - echo "Done."
+```
