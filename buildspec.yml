@@ -1,28 +1,21 @@
-```yaml
 version: 0.2
 
 phases:
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR..."
-      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - REGION=$AWS_DEFAULT_REGION
-      - REPOSITORY_NAME=secret-santa
-      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 762794225187.dkr.ecr.us-east-2.amazonaws.com
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
 
   build:
     commands:
-      - echo "Building Maven project..."
-      - mvn clean package -DskipTests
-      - ls -la
-      - ls -la target
-      - echo "Building Docker image..."
-      - docker build -t $REPOSITORY_NAME .
-      - docker tag $REPOSITORY_NAME:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
+      - echo Building Docker image...
+      - docker build -t 762794225187.dkr.ecr.us-east-2.amazonaws.com/secret-santa:latest .
+      - docker tag 762794225187.dkr.ecr.us-east-2.amazonaws.com/secret-santa:latest 762794225187.dkr.ecr.us-east-2.amazonaws.com/secret-santa:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo "Pushing image..."
-      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
-```
+      - echo Pushing to ECR...
+      - docker push 762794225187.dkr.ecr.us-east-2.amazonaws.com/secret-santa:latest
+      - docker push 762794225187.dkr.ecr.us-east-2.amazonaws.com/secret-santa:$IMAGE_TAG
+      - echo Build complete!
