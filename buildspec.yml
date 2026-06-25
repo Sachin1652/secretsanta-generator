@@ -25,5 +25,4 @@ phases:
     commands:
       - echo "Pushing image..."
       - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
-      - echo "Done."
 ```
